@@ -10,39 +10,39 @@ namespace Matte_Seminarium_2
 {
     public class GameObject
     {
-        public Vector2 Position { get; private set; }
+        public Vector2 Origin { get; private set; }
 
         private Vector2 velocity;
 
         public Rectangle HitBox { get; private set; }
 
-        private int radius;
+        private float radius;
 
         public Texture2D Tex { get; private set; }
 
-        public GameObject(Vector2 position, Vector2 velocity, Texture2D tex, int radius)
+        public GameObject(Vector2 position, Vector2 velocity, Texture2D tex, float radius)
         {
-            Position = position;
+            Origin = position;
             this.velocity = velocity;
             Tex = tex;
             this.radius = radius;
 
-            HitBox = new(Position.ToPoint(), new(radius * 2, radius * 2));
+            HitBox = new((int)(Origin.X - radius), (int)(Origin.Y - radius), (int)radius * 2, (int)radius * 2);
         }
 
         public void Move()
         {
-            Position += velocity;
+            Origin += velocity;
         }
 
-        public void SetPos(Vector2 Pos)
+        public void SetOrigin(Vector2 origin)
         {
-            Position = Pos;
+            Origin = origin;
         }
 
         public void Update()
         {
-            HitBox = new(Position.ToPoint(), HitBox.Size);
+            HitBox = new((int)Origin.X - HitBox.Width / 2, (int)Origin.Y - HitBox.Height / 2, HitBox.Width, HitBox.Height);
         }
 
         public void Draw(SpriteBatch spriteBatch)

@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Spline;
+using System;
 using System.Collections.Generic;
 
 namespace Matte_Seminarium_2
@@ -18,7 +19,7 @@ namespace Matte_Seminarium_2
         private GameObject car;
         private List<GameObject> balls;
 
-        private Vector2 startPos;
+        private Vector2 originOfCircle;
 
         States state = States.Executing;
 
@@ -53,7 +54,7 @@ namespace Matte_Seminarium_2
             cannonTex = Content.Load<Texture2D>("cannon");
 
             balls = new();
-            startPos = new(700, 100);
+            originOfCircle = new(600, 400);
 
             if(state == States.Executing)
             {
@@ -62,14 +63,9 @@ namespace Matte_Seminarium_2
                 carPath = new(GraphicsDevice);
                 carPath.Clean();
 
-                carPath.AddPoint(startPos);
-                carPath.SetPos(0, startPos);
-                carPath.AddPoint(new(startPos.X + 50, startPos.Y + 50));
-                carPath.AddPoint(new(startPos.X, startPos.Y + 100));
-                carPath.AddPoint(new(startPos.X - 50, startPos.Y + 50));
-                carPath.AddPoint(startPos);
+                CreateCirclePath();
 
-                car = new(startPos, Vector2.Zero, carTex, 1);
+                car = new(new(originOfCircle.X, originOfCircle.Y - 100), Vector2.Zero, carTex, 20);
 
             }
         }
@@ -86,6 +82,11 @@ namespace Matte_Seminarium_2
                 DrawCarOnRenderTarget();
 
                 carPos += 5;
+
+                if(carPos >= carPath.endT)
+                {
+                    carPos = carPath.beginT;
+                }
             }           
 
             base.Update(gameTime);
@@ -93,7 +94,7 @@ namespace Matte_Seminarium_2
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.Black);
+            GraphicsDevice.Clear(Color.Green);
 
             // TODO: Add your drawing code here
             _spriteBatch.Begin();
@@ -116,12 +117,52 @@ namespace Matte_Seminarium_2
             GraphicsDevice.Clear(Color.Transparent);
             _spriteBatch.Begin();
 
-            _spriteBatch.Draw(carTex, carPath.GetPos(carPos), Color.White);
-            car.SetPos(carPath.GetPos(carPos));
+            car.SetOrigin(carPath.GetPos(carPos));
+            car.Update();
+
+            car.Draw(_spriteBatch);
 
             _spriteBatch.End();
 
             GraphicsDevice.SetRenderTarget(null);
+        }
+
+        private void CreateCirclePath()
+        {
+            carPath.AddPoint(new(originOfCircle.X + 100 * (float)Math.Cos(MathHelper.ToRadians(90)),
+                                 originOfCircle.Y + 100 * (float)Math.Sin(MathHelper.ToRadians(90))));
+            carPath.AddPoint(new(originOfCircle.X + 100 * (float)Math.Cos(MathHelper.ToRadians(60)),
+                             originOfCircle.Y + 100 * (float)Math.Sin(MathHelper.ToRadians(60))));
+            carPath.AddPoint(new(originOfCircle.X + 100 * (float)Math.Cos(MathHelper.ToRadians(45)),
+                             originOfCircle.Y + 100 * (float)Math.Sin(MathHelper.ToRadians(45))));
+            carPath.AddPoint(new(originOfCircle.X + 100 * (float)Math.Cos(MathHelper.ToRadians(30)),
+                             originOfCircle.Y + 100 * (float)Math.Sin(MathHelper.ToRadians(30))));
+            carPath.AddPoint(new(originOfCircle.X + 100 * (float)Math.Cos(MathHelper.ToRadians(0)),
+                             originOfCircle.Y + 100 * (float)Math.Sin(MathHelper.ToRadians(0))));
+            carPath.AddPoint(new(originOfCircle.X + 100 * (float)Math.Cos(MathHelper.ToRadians(330)),
+                             originOfCircle.Y + 100 * (float)Math.Sin(MathHelper.ToRadians(330))));
+            carPath.AddPoint(new(originOfCircle.X + 100 * (float)Math.Cos(MathHelper.ToRadians(315)),
+                             originOfCircle.Y + 100 * (float)Math.Sin(MathHelper.ToRadians(315))));
+            carPath.AddPoint(new(originOfCircle.X + 100 * (float)Math.Cos(MathHelper.ToRadians(300)),
+                             originOfCircle.Y + 100 * (float)Math.Sin(MathHelper.ToRadians(300))));
+            carPath.AddPoint(new(originOfCircle.X + 100 * (float)Math.Cos(MathHelper.ToRadians(270)),
+                             originOfCircle.Y + 100 * (float)Math.Sin(MathHelper.ToRadians(270))));
+            carPath.AddPoint(new(originOfCircle.X + 100 * (float)Math.Cos(MathHelper.ToRadians(240)),
+                             originOfCircle.Y + 100 * (float)Math.Sin(MathHelper.ToRadians(240))));
+            carPath.AddPoint(new(originOfCircle.X + 100 * (float)Math.Cos(MathHelper.ToRadians(225)),
+                             originOfCircle.Y + 100 * (float)Math.Sin(MathHelper.ToRadians(225))));
+            carPath.AddPoint(new(originOfCircle.X + 100 * (float)Math.Cos(MathHelper.ToRadians(210)),
+                             originOfCircle.Y + 100 * (float)Math.Sin(MathHelper.ToRadians(210))));
+            carPath.AddPoint(new(originOfCircle.X + 100 * (float)Math.Cos(MathHelper.ToRadians(180)),
+                             originOfCircle.Y + 100 * (float)Math.Sin(MathHelper.ToRadians(180))));
+            carPath.AddPoint(new(originOfCircle.X + 100 * (float)Math.Cos(MathHelper.ToRadians(150)),
+                             originOfCircle.Y + 100 * (float)Math.Sin(MathHelper.ToRadians(150))));
+            carPath.AddPoint(new(originOfCircle.X + 100 * (float)Math.Cos(MathHelper.ToRadians(135)),
+                             originOfCircle.Y + 100 * (float)Math.Sin(MathHelper.ToRadians(135))));
+            carPath.AddPoint(new(originOfCircle.X + 100 * (float)Math.Cos(MathHelper.ToRadians(120)),
+                             originOfCircle.Y + 100 * (float)Math.Sin(MathHelper.ToRadians(120))));
+            carPath.AddPoint(new(originOfCircle.X + 100 * (float)Math.Cos(MathHelper.ToRadians(90)),
+                             originOfCircle.Y + 100 * (float)Math.Sin(MathHelper.ToRadians(90))));
         }
 
         enum States
