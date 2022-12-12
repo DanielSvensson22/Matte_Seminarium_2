@@ -8,7 +8,6 @@ namespace Matte_Seminarium_2
         public Vector2 Origin { get; private set; }
 
         private Vector2 velocity;
-        public Vector2 Velocity { get => velocity; }
 
         public Rectangle HitBox { get; private set; }
 
@@ -37,15 +36,20 @@ namespace Matte_Seminarium_2
             Origin = origin;
         }
 
-        public void Update(float rotation)
+
+        public void SetRotation(float rotation)
+        {
+            this.rotation = rotation;
+        }
+
+        public void Update()
         {
             HitBox = new((int)Origin.X - HitBox.Width / 2, (int)Origin.Y - HitBox.Height / 2, HitBox.Width, HitBox.Height);
-            this.rotation = rotation;
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(Tex, HitBox, null, Color.White, rotation, Vector2.Zero, SpriteEffects.None, 0);
+            spriteBatch.Draw(Tex, new Rectangle(HitBox.X + HitBox.Width / 2, HitBox.Y + HitBox.Height / 2, HitBox.Width, HitBox.Height), null, Color.White, rotation, new(HitBox.Width / 2, HitBox.Height / 2), SpriteEffects.None, 0);
         }
     }
 }

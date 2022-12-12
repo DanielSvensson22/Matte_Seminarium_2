@@ -92,18 +92,20 @@ namespace Matte_Seminarium_2
 
             previousMouseState = mouseState;
             mouseState = Mouse.GetState();
-            shootingRotation = MouseDirection(8);
+            shootingRotation = MouseDirection(4);
 
             if(state == States.Executing)
             {
                 DrawCarOnRenderTarget();
 
-                carPos += 5;
+                carPos += 1;
 
                 if(carPos >= carPath.endT)
                 {
                     carPos = carPath.beginT;
                 }
+
+                CheckCarRotation();
 
                 if(mouseState.LeftButton == ButtonState.Pressed && previousMouseState.LeftButton == ButtonState.Released)
                 {
@@ -123,7 +125,7 @@ namespace Matte_Seminarium_2
                     }
 
                     balls[i].Move();
-                    balls[i].Update(0);
+                    balls[i].Update();
 
                     if (HitCar(balls[i]))
                     {
@@ -146,7 +148,9 @@ namespace Matte_Seminarium_2
             {
                 carPath.Draw(_spriteBatch);
 
-                _spriteBatch.Draw(renderTarget, Vector2.Zero, Color.White);
+                //_spriteBatch.Draw(renderTarget, Vector2.Zero, Color.White);
+
+                car.Draw(_spriteBatch);
 
                 foreach(GameObject ball in balls)
                 {
@@ -172,6 +176,14 @@ namespace Matte_Seminarium_2
             return (float)Math.Asin(direction.Y / direction.Length()) + (float)Math.PI / 2;
         }
 
+        private void CheckCarRotation()
+        {
+            float x = carPath.GetPos(carPos).X - originOfCircle.X;
+            float y = carPath.GetPos(carPos).Y - originOfCircle.Y;
+
+            car.SetRotation((-(float)MathF.Atan2(x, y)) + (float)Math.PI);
+        }
+
         private void DrawCarOnRenderTarget()
         {
             GraphicsDevice.SetRenderTarget(renderTarget);
@@ -179,7 +191,7 @@ namespace Matte_Seminarium_2
             _spriteBatch.Begin();
 
             car.SetOrigin(carPath.GetPos(carPos));
-            car.Update(0);
+            car.Update();
 
             car.Draw(_spriteBatch);
 
