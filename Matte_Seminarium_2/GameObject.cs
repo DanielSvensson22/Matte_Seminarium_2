@@ -12,6 +12,9 @@ namespace Matte_Seminarium_2
         public Rectangle HitBox { get; private set; }
 
         private float radius;
+
+        public float Radius { get { return radius; } }
+
         private float rotation;
 
         public Texture2D Tex { get; private set; }
