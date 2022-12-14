@@ -11,6 +11,7 @@ namespace Matte_Seminarium_2
 
         public Rectangle HitBox { get; private set; }
 
+        //Adds hitbox for drawing with rotation.
         public Rectangle DrawHitBox { get; private set; }
 
         private float radius;
