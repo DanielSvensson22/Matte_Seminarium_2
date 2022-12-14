@@ -31,9 +31,10 @@ namespace Matte_Seminarium_2
 
         private Vector2 ballSpawn;
         private Vector2 ballSpeed;
+        private int ballSpeedMultiplier;
         private float shootingRotation;
 
-        private int ballRadius;
+        public static int ballRadius;
 
         States state = States.Preparing;
 
@@ -42,6 +43,8 @@ namespace Matte_Seminarium_2
         private float carSpeed;
         private RenderTarget2D renderTarget;
         private RenderTarget2D ballRenderTarget;
+
+        private bool pathIsCurved;
 
         List<double> hitTimes;
         List<Vector2> ballHitOrigins;
@@ -82,24 +85,27 @@ namespace Matte_Seminarium_2
             if(state == States.Preparing)
             {
                 carSpeed = 1;
+                ballSpeedMultiplier = 4;
                 circleSize = 100;
                 ballRadius = 20;
 
                 timer = new();
                 inputTimer = new();
 
+                pathIsCurved = false;
+
                 hitTimes = new();
                 ballHitOrigins = new();
                 carHitOrigins = new();
                 collisionPoints = new();
+
+                carPath = new(GraphicsDevice);
+                carPath.Clean();
             }
             else if(state == States.Executing)
             {
                 renderTarget = new(GraphicsDevice, Window.ClientBounds.Width, Window.ClientBounds.Height);
                 ballRenderTarget = new(GraphicsDevice, Window.ClientBounds.Width, Window.ClientBounds.Height);
-
-                carPath = new(GraphicsDevice);
-                carPath.Clean();
 
                 CreateCirclePath(circleSize);
 
@@ -116,7 +122,7 @@ namespace Matte_Seminarium_2
 
             previousMouseState = mouseState;
             mouseState = Mouse.GetState();
-            shootingRotation = MouseDirection(4);
+            shootingRotation = MouseDirection(ballSpeedMultiplier);
 
             if (Keyboard.GetState().IsKeyDown(Keys.P))
             {
@@ -139,6 +145,8 @@ namespace Matte_Seminarium_2
                 circleSize += ValueChange(Keys.X, Keys.Z, 1);
 
                 carSpeed += ValueChange(Keys.V, Keys.C, 1);
+
+                ballSpeedMultiplier += ValueChange(Keys.G, Keys.F, 1);
             }
             else if(state == States.Executing)
             {
@@ -153,19 +161,27 @@ namespace Matte_Seminarium_2
                     carPos = carPath.beginT;
                 }
 
-                CheckCarRotation();
+                if (!pathIsCurved)
+                {
+                    CheckCarRotation(originOfCircle);
+                }
+                else
+                {
+                    CheckCarRotationOnCurve();
+                }
 
                 if(mouseState.LeftButton == ButtonState.Pressed && previousMouseState.LeftButton == ButtonState.Released)
                 {
-                    balls.Add(new(new(ballSpawn.X + ballTex.Width / 2, ballSpawn.Y - ballTex.Height / 2), ballSpeed, ballTex, ballRadius));
+                    balls.Add(new(new(ballSpawn.X + ballRadius * 2, ballSpawn.Y - ballRadius * 2), ballSpeed, ballTex, ballRadius));
                 }
 
                 for(int i = 0; i < balls.Count; i++)
                 {
                     Rectangle screen = new(0, 0, Window.ClientBounds.Width, Window.ClientBounds.Height);
 
-                    if (!screen.Contains(balls[i].HitBox.Location - new Point(10, 10)) || 
-                        !screen.Contains(balls[i].HitBox.Location + new Point(balls[i].HitBox.Width + 10, balls[i].HitBox.Height + 10)))
+                    if (!screen.Contains(balls[i].DrawHitBox.Location - new Point(10 + ballSpeedMultiplier, 10 + ballSpeedMultiplier)) || 
+                        !screen.Contains(balls[i].DrawHitBox.Location + new Point(balls[i].DrawHitBox.Width + 10 + ballSpeedMultiplier, 
+                                                                              balls[i].DrawHitBox.Height + 10 + ballSpeedMultiplier)))
                     {
                         balls.Remove(balls[i]);
 
@@ -186,6 +202,11 @@ namespace Matte_Seminarium_2
                     state = States.ListCheck;
                     LoadContent();
                 }
+
+                if (Keyboard.GetState().IsKeyDown(Keys.D2) && !pathIsCurved)
+                {
+                    CreateCurvePath();
+                }
             }           
 
             base.Update(gameTime);
@@ -201,6 +222,8 @@ namespace Matte_Seminarium_2
             if(state == States.Preparing)
             {
                 _spriteBatch.DrawString(font, $"Radius of ball: {ballRadius}", new(10, 50), Color.Red);
+
+                _spriteBatch.DrawString(font, $"Speed of ball: {ballSpeedMultiplier}", new(10, 100), Color.Blue);
 
                 _spriteBatch.DrawString(font, $"Radius of circle path: {circleSize}", new(300, 50), Color.Gold);
 
@@ -219,8 +242,8 @@ namespace Matte_Seminarium_2
                     ball.Draw(_spriteBatch);
                 }
 
-                _spriteBatch.Draw(cannonTex, ballSpawn, null, Color.White, shootingRotation, 
-                                  new(cannonTex.Width / 2, cannonTex.Height / 2), 1, SpriteEffects.None, 0);
+                _spriteBatch.Draw(cannonTex, new Rectangle(ballSpawn.ToPoint() + new Point(20, -20), new(ballRadius * 4, ballRadius * 4)), null, Color.White, shootingRotation, 
+                                  new(cannonTex.Width / 2, cannonTex.Height / 2), SpriteEffects.None, 0);
             }
             else if(state == States.ListCheck)
             {
@@ -231,7 +254,7 @@ namespace Matte_Seminarium_2
 
                 for (int i = 0; i < ballHitOrigins.Count; i++)
                 {
-                    _spriteBatch.DrawString(font, $"Ball collided at coordinates: {(int)ballHitOrigins[i].X}; {(int)ballHitOrigins[i].Y}", new(150, 10 + 20 * i), Color.Red);
+                    _spriteBatch.DrawString(font, $"Ball collided at coordinates: {(int)ballHitOrigins[i].X}; {(int)ballHitOrigins[i].Y}", new(160, 10 + 20 * i), Color.Red);
                 }
 
                 for (int i = 0; i < carHitOrigins.Count; i++)
@@ -250,6 +273,7 @@ namespace Matte_Seminarium_2
             base.Draw(gameTime);
         }
 
+        //Changes values of an integer;
         public int ValueChange(Keys increaseKey, Keys decreaseKey, int changeInValue)
         {
             if (inputTimer.time > 0.1)
@@ -271,6 +295,7 @@ namespace Matte_Seminarium_2
             return 0;
         }
 
+        //Determines angle of mouse position to bottom left corner and where to shoot a ball.
         private float MouseDirection(int ballSpeed)
         {
             Vector2 direction = mouseState.Position.ToVector2() - ballSpawn;
@@ -281,14 +306,45 @@ namespace Matte_Seminarium_2
             return (float)Math.Asin(direction.Y / direction.Length()) + (float)Math.PI / 2;
         }
 
-        private void CheckCarRotation()
+        //Gets rotation of car in relation to a point.
+        private void CheckCarRotation(Vector2 point)
         {
-            float x = carPath.GetPos(carPos).X - originOfCircle.X;
-            float y = carPath.GetPos(carPos).Y - originOfCircle.Y;
+            float x = carPath.GetPos(carPos).X - point.X;
+            float y = carPath.GetPos(carPos).Y - point.Y;
 
             car.SetRotation((-(float)MathF.Atan2(x, y)) + (float)Math.PI);
         }
 
+        //Gives car rotation on the curve.
+        private void CheckCarRotationOnCurve()
+        {
+            if(car.Origin.X > 108 * 2 - 15 && car.Origin.X < 108 * 2 + 15)
+            {
+                CheckCarRotation(new(108 * 2, 450));
+            }
+            else if(car.Origin.X < 108 * 3)
+            {
+                CheckCarRotation(new(108, 450));
+            }
+            else if (car.Origin.X > 108 * 6 - 15 && car.Origin.X < 108 * 6 + 15)
+            {
+                CheckCarRotation(new(108 * 6, 450));
+            }
+            else if(car.Origin.X < 108 * 7)
+            {
+                CheckCarRotation(new(108 * 5, 450));
+            }
+            else if(car.Origin.X > 108 * 10 - 15 && car.Origin.X < 108 * 10 + 15)
+            {
+                CheckCarRotation(new(108 * 10, 450));
+            }
+            else if(car.Origin.X < 108 * 11)
+            {
+                CheckCarRotation(new(108 * 9, 450));
+            }
+        }
+
+        //Draws the car on the render target so pixel perfect collision can be done with the car.
         private void DrawCarOnRenderTarget()
         {
             GraphicsDevice.SetRenderTarget(renderTarget);
@@ -298,13 +354,14 @@ namespace Matte_Seminarium_2
             car.SetOrigin(carPath.GetPos(carPos));
             car.Update();
 
-            car.Draw(_spriteBatch);
+            car.AltDraw(_spriteBatch);
 
             _spriteBatch.End();
 
             GraphicsDevice.SetRenderTarget(null);
         }
 
+        //Draws a ball on ball render target.
         private void DrawBallOnRenderTarget(GameObject ball)
         {
             GraphicsDevice.SetRenderTarget(ballRenderTarget);
@@ -318,6 +375,7 @@ namespace Matte_Seminarium_2
             GraphicsDevice.SetRenderTarget(null);
         }
 
+        //Creates a path in the shape of a circle.
         private void CreateCirclePath(int size)
         {
             carPath.AddPoint(new(originOfCircle.X + size * (float)Math.Cos(MathHelper.ToRadians(90)),
@@ -356,16 +414,48 @@ namespace Matte_Seminarium_2
                              originOfCircle.Y + size * (float)Math.Sin(MathHelper.ToRadians(90))));
         }
 
+        //Creates a curvy path.
+        private void CreateCurvePath()
+        {
+            carPath.Clean();
+
+            carPath.AddPoint(new(0, 200));
+            carPath.AddPoint(new(108, 100));
+            carPath.AddPoint(new(108 * 2 - 10, 200));
+            carPath.AddPoint(new(108 * 2, 200));
+            carPath.AddPoint(new(108 * 2 + 10, 200));
+            carPath.AddPoint(new(108 * 3, 300));
+            carPath.AddPoint(new(108 * 4, 200));
+            carPath.AddPoint(new(108 * 5, 100));
+            carPath.AddPoint(new(108 * 6 - 10, 200));
+            carPath.AddPoint(new(108 * 6, 200));
+            carPath.AddPoint(new(108 * 6 + 10, 200));
+            carPath.AddPoint(new(108 * 7, 300));
+            carPath.AddPoint(new(108 * 8, 200));
+            carPath.AddPoint(new(108 * 9, 100));
+            carPath.AddPoint(new(108 * 10 - 10, 200));
+            carPath.AddPoint(new(108 * 10, 200));
+            carPath.AddPoint(new(108 * 10 + 10, 200));
+
+            pathIsCurved = true;
+
+            car = new(new(0, 200), Vector2.Zero, carTex, 20)
+            {
+                spriteEffect = SpriteEffects.FlipHorizontally
+            };
+        }
+
+        //Pixel perfect bollision with the car and a ball.
         public bool HitCar(GameObject ball)
         {
-            Color[] pixels = new Color[ball.HitBox.Width * ball.HitBox.Height];
-            Color[] pixels2 = new Color[ball.HitBox.Width * ball.HitBox.Height];
+            Color[] pixels = new Color[ball.DrawHitBox.Width * ball.DrawHitBox.Height];
+            Color[] pixels2 = new Color[ball.DrawHitBox.Width * ball.DrawHitBox.Height];
 
             DrawBallOnRenderTarget(ball);
 
-            ballRenderTarget.GetData(0, ball.HitBox, pixels2, 0, pixels2.Length);
+            ballRenderTarget.GetData(0, ball.DrawHitBox, pixels2, 0, pixels2.Length);
 
-            renderTarget.GetData(0, ball.HitBox, pixels, 0, pixels.Length);
+            renderTarget.GetData(0, ball.DrawHitBox, pixels, 0, pixels.Length);
 
             for (int i = 0; i < pixels.Length; ++i)
             {
@@ -383,6 +473,7 @@ namespace Matte_Seminarium_2
             return false;
         }
 
+        //Return the collision point between the car and a ball.
         private Vector2 GiveCollisionPoint(GameObject ball)
         {
             float x = ((ball.Origin.X * car.Radius) + (car.Origin.X * ball.Radius)) / (ball.Radius + car.Radius);
