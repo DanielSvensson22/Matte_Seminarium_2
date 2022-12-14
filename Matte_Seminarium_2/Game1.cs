@@ -213,6 +213,8 @@ namespace Matte_Seminarium_2
                 waveScale += ValueChange(Keys.X, Keys.Z, (float)gameTime.TotalGameTime.TotalSeconds);
 
                 waveMag += ValueChange(Keys.V, Keys.C, (float)gameTime.TotalGameTime.TotalSeconds);
+
+                waveSpeed += (float)gameTime.TotalGameTime.TotalSeconds;
             }
 
             base.Update(gameTime);
