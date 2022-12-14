@@ -25,7 +25,7 @@ namespace Matte_Seminarium_2
         private List<GameObject> balls;
 
         private Vector2 originOfCircle;
-        private Vector2 originOfWave;
+        private Vector2 originVector;
         private Vector2 scaledVector;
         private Vector2 position;
         private int circleSize = 100;
@@ -142,7 +142,7 @@ namespace Matte_Seminarium_2
             {
                 if (Keyboard.GetState().IsKeyDown(Keys.Enter))
                 {
-                    state = States.Executing;
+                    state = States.WavePath;
                     LoadContent();
                 }
 
@@ -202,7 +202,8 @@ namespace Matte_Seminarium_2
                 }
             }else if(state == state.WavePath)
             {
-                car.SetOrgin(new Vector2(0,Window.ClientBounds.Height/2));
+                //car.SetOrgin(new Vector2(0,Window.ClientBounds.Height/2));
+                UpdateWave(gameTime);
             }
 
             base.Update(gameTime);
@@ -260,6 +261,9 @@ namespace Matte_Seminarium_2
                 {
                     _spriteBatch.DrawString(font, $"Ball and car collided at coordinates: {(int)collisionPoints[i].X}; {(int)collisionPoints[i].Y}", new(750, 10 + 20 * i), Color.Purple);
                 }
+            }else if(state == States.WavePath)
+            {
+                DrawCarOnWave();
             }
 
             _spriteBatch.End();
@@ -313,6 +317,21 @@ namespace Matte_Seminarium_2
             _spriteBatch.Begin();
 
             car.SetOrigin(carPath.GetPos(carPos));
+            car.Update();
+
+            car.Draw(_spriteBatch);
+
+            _spriteBatch.End();
+
+            GraphicsDevice.SetRenderTarget(null);
+        }
+        
+        private void DrawCarOnWave()
+        {
+            GraphicsDevice.SetRenderTarget(renderTarget);
+            GraphicsDevice.Clear(Color.Transparent);
+            _spriteBatch.Begin();
+
             car.Update();
 
             car.Draw(_spriteBatch);
