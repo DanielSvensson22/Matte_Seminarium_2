@@ -17,7 +17,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Spline">
-      <HintPath>..\Spline.dll</HintPath>
+		<HintPath>..\..\..\..\OneDrive\Dokument\Utilities\Spline\Spline.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Target Name="RestoreDotnetTools" BeforeTargets="Restore">

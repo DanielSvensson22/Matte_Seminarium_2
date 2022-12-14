@@ -4,7 +4,6 @@ using Microsoft.Xna.Framework.Input;
 using Spline;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 
 namespace Matte_Seminarium_2
 {
@@ -32,7 +31,7 @@ namespace Matte_Seminarium_2
         private int waveInterval = 10;
         private int waveScale = 15;
         private int waveMag = 15;
-        private int waveSpeed = 15;
+        private int waveSpeed = 5;
 
         private MouseState previousMouseState;
         private MouseState mouseState;
@@ -86,7 +85,7 @@ namespace Matte_Seminarium_2
 
             balls = new();
             originOfCircle = new(800, 200);
-            originOfWave = new(0, Window.ClientBounds.Height/2);
+            originVector = new(0, Window.ClientBounds.Height/2);
             ballSpawn = new(20, Window.ClientBounds.Height - 20);
 
             if(state == States.Preparing)
@@ -102,6 +101,8 @@ namespace Matte_Seminarium_2
                 ballHitOrigins = new();
                 carHitOrigins = new();
                 collisionPoints = new();
+
+                car = new(new(originOfCircle.X, originOfCircle.Y - circleSize), Vector2.Zero, carTex, 20);
             }
             else if(state == States.Executing)
             {
@@ -115,9 +116,9 @@ namespace Matte_Seminarium_2
                 //wavePath.Clean();
 
                 CreateCirclePath(circleSize);
-                CreateWavePath();
+                //CreateWavePath();
 
-                car = new(new(originOfCircle.X, originOfCircle.Y - circleSize), Vector2.Zero, carTex, 20);
+                
             }
         }
 
@@ -200,7 +201,7 @@ namespace Matte_Seminarium_2
                     state = States.ListCheck;
                     LoadContent();
                 }
-            }else if(state == state.WavePath)
+            }else if(state == States.WavePath)
             {
                 //car.SetOrgin(new Vector2(0,Window.ClientBounds.Height/2));
                 UpdateWave(gameTime);
@@ -261,12 +262,14 @@ namespace Matte_Seminarium_2
                 {
                     _spriteBatch.DrawString(font, $"Ball and car collided at coordinates: {(int)collisionPoints[i].X}; {(int)collisionPoints[i].Y}", new(750, 10 + 20 * i), Color.Purple);
                 }
-            }else if(state == States.WavePath)
-            {
-                DrawCarOnWave();
             }
 
             _spriteBatch.End();
+
+            if (state == States.WavePath)
+            {
+                DrawCarOnWave();
+            }
 
             base.Draw(gameTime);
         }
@@ -427,7 +430,7 @@ namespace Matte_Seminarium_2
             return false;
         }
 
-        private void UpdateWave()
+        private void UpdateWave(GameTime gameTime)
         {
             scaledVector = new Vector2(waveScale * (float)gameTime.TotalGameTime.TotalSeconds * waveSpeed, waveScale * (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds * waveSpeed) * waveMag);
 
