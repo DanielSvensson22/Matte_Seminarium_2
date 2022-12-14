@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Input;
 using Spline;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 
 namespace Matte_Seminarium_2
 {
@@ -24,7 +25,14 @@ namespace Matte_Seminarium_2
         private List<GameObject> balls;
 
         private Vector2 originOfCircle;
+        private Vector2 originOfWave;
+        private Vector2 scaledVector;
+        private Vector2 position;
         private int circleSize = 100;
+        private int waveInterval = 10;
+        private int waveScale = 15;
+        private int waveMag = 15;
+        private int waveSpeed = 15;
 
         private MouseState previousMouseState;
         private MouseState mouseState;
@@ -38,6 +46,7 @@ namespace Matte_Seminarium_2
         States state = States.Preparing;
 
         private SimplePath carPath;
+        private SimplePath wavePath;
         private float carPos;
         private float carSpeed;
         private RenderTarget2D renderTarget;
@@ -77,6 +86,7 @@ namespace Matte_Seminarium_2
 
             balls = new();
             originOfCircle = new(800, 200);
+            originOfWave = new(0, Window.ClientBounds.Height/2);
             ballSpawn = new(20, Window.ClientBounds.Height - 20);
 
             if(state == States.Preparing)
@@ -101,7 +111,11 @@ namespace Matte_Seminarium_2
                 carPath = new(GraphicsDevice);
                 carPath.Clean();
 
+                //wavePath = new(GraphicsDevice);
+                //wavePath.Clean();
+
                 CreateCirclePath(circleSize);
+                CreateWavePath();
 
                 car = new(new(originOfCircle.X, originOfCircle.Y - circleSize), Vector2.Zero, carTex, 20);
             }
@@ -186,7 +200,10 @@ namespace Matte_Seminarium_2
                     state = States.ListCheck;
                     LoadContent();
                 }
-            }           
+            }else if(state == state.WavePath)
+            {
+                car.SetOrgin(new Vector2(0,Window.ClientBounds.Height/2));
+            }
 
             base.Update(gameTime);
         }
@@ -209,7 +226,7 @@ namespace Matte_Seminarium_2
             else if(state == States.Executing)
             {
                 carPath.Draw(_spriteBatch);
-
+                //wavePath.Draw(_spriteBatch);
                 //_spriteBatch.Draw(renderTarget, Vector2.Zero, Color.White);
 
                 car.Draw(_spriteBatch);
@@ -356,6 +373,14 @@ namespace Matte_Seminarium_2
                              originOfCircle.Y + size * (float)Math.Sin(MathHelper.ToRadians(90))));
         }
 
+        /*private void CreateWavePath()
+        {
+            for(int i = 0; i < waveInterval; i++)
+            {
+                wavePath.AddPoint((i * Window.ClientBounds.Height/waveInterval), (float)Math.Sin(i) * waveSize);
+            }
+        }*/
+
         public bool HitCar(GameObject ball)
         {
             Color[] pixels = new Color[ball.HitBox.Width * ball.HitBox.Height];
@@ -383,6 +408,16 @@ namespace Matte_Seminarium_2
             return false;
         }
 
+        private void UpdateWave()
+        {
+            scaledVector = new Vector2(waveScale * (float)gameTime.TotalGameTime.TotalSeconds * waveSpeed, waveScale * (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds * waveSpeed) * waveMag);
+
+            position = originVector + scaledVector;
+            //rect.X = (int)position.X;
+            //rect.Y = (int)position.Y;
+            car.SetOrigin(position);
+        }
+
         private Vector2 GiveCollisionPoint(GameObject ball)
         {
             float x = ((ball.Origin.X * car.Radius) + (car.Origin.X * ball.Radius)) / (ball.Radius + car.Radius);
@@ -396,6 +431,7 @@ namespace Matte_Seminarium_2
             Preparing,
             Executing,
             ListCheck,
+            WavePath,
         }
     }
 }
