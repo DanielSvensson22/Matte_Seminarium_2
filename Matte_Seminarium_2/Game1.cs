@@ -205,6 +205,12 @@ namespace Matte_Seminarium_2
             {
                 //car.SetOrgin(new Vector2(0,Window.ClientBounds.Height/2));
                 UpdateWave(gameTime);
+
+                waveSpeed += ValueChange(Keys.S, Keys.A, 1);
+
+                waveScale += ValueChange(Keys.X, Keys.Z, 1);
+
+                waveMag += ValueChange(Keys.V, Keys.C, 1);
             }
 
             base.Update(gameTime);
