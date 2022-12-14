@@ -29,9 +29,9 @@ namespace Matte_Seminarium_2
         private Vector2 position;
         private int circleSize = 100;
         private int waveInterval = 10;
-        private int waveScale = 15;
-        private int waveMag = 15;
-        private int waveSpeed = 5;
+        private float waveScale = 15;
+        private float waveMag = 15;
+        private float waveSpeed = 5;
 
         private MouseState previousMouseState;
         private MouseState mouseState;
@@ -149,9 +149,9 @@ namespace Matte_Seminarium_2
 
                 inputTimer.Update(gameTime);
 
-                ballRadius += ValueChange(Keys.S, Keys.A, 1);
+                ballRadius += (int)ValueChange(Keys.S, Keys.A, 1);
 
-                circleSize += ValueChange(Keys.X, Keys.Z, 1);
+                circleSize += (int)ValueChange(Keys.X, Keys.Z, 1);
 
                 carSpeed += ValueChange(Keys.V, Keys.C, 1);
             }
@@ -208,11 +208,11 @@ namespace Matte_Seminarium_2
 
                 inputTimer.Update(gameTime);
 
-                waveSpeed += ValueChange(Keys.S, Keys.A, 1);
+                waveSpeed += ValueChange(Keys.S, Keys.A, (float)gameTime.TotalGameTime.TotalSeconds);
 
-                waveScale += ValueChange(Keys.X, Keys.Z, 1);
+                waveScale += ValueChange(Keys.X, Keys.Z, (float)gameTime.TotalGameTime.TotalSeconds);
 
-                waveMag += ValueChange(Keys.V, Keys.C, 1);
+                waveMag += ValueChange(Keys.V, Keys.C, (float)gameTime.TotalGameTime.TotalSeconds);
             }
 
             base.Update(gameTime);
@@ -282,7 +282,7 @@ namespace Matte_Seminarium_2
             base.Draw(gameTime);
         }
 
-        public int ValueChange(Keys increaseKey, Keys decreaseKey, int changeInValue)
+        public float ValueChange(Keys increaseKey, Keys decreaseKey, float changeInValue)
         {
             if (inputTimer.time > 0.1)
             {
