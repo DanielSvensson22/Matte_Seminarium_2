@@ -435,7 +435,7 @@ namespace Matte_Seminarium_2
             scaledVector = new Vector2(waveScale * (float)gameTime.TotalGameTime.TotalSeconds * waveSpeed, waveScale * (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds * waveSpeed) * waveMag);
 
             position = originVector + scaledVector;
-            if(!(position.X < Window.ClientBounds.Width)) { position.X = 0; }
+            if(!(position.X < Window.ClientBounds.Width)) { position.X = 0; scaledVector = Vector2.Zero; }
             //rect.X = (int)position.X;
             //rect.Y = (int)position.Y;
             car.SetOrigin(position);
