@@ -208,13 +208,13 @@ namespace Matte_Seminarium_2
 
                 inputTimer.Update(gameTime);
 
-                waveSpeed += ValueChange(Keys.S, Keys.A, (float)gameTime.TotalGameTime.TotalSeconds);
+                waveSpeed += ValueChange(Keys.S, Keys.A, (float)gameTime.TotalGameTime.TotalMinutes);
 
-                waveScale += ValueChange(Keys.X, Keys.Z, (float)gameTime.TotalGameTime.TotalSeconds);
+                waveScale += ValueChange(Keys.X, Keys.Z, (float)gameTime.TotalGameTime.TotalMinutes);
 
-                waveMag += ValueChange(Keys.V, Keys.C, (float)gameTime.TotalGameTime.TotalSeconds);
+                waveMag += ValueChange(Keys.V, Keys.C, (float)gameTime.TotalGameTime.TotalMinutes);
 
-                waveSpeed += (float)gameTime.TotalGameTime.TotalMinutes;
+                //waveSpeed += (float)gameTime.TotalGameTime.TotalMinutes;
             }
 
             base.Update(gameTime);
