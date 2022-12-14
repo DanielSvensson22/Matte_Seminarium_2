@@ -264,7 +264,7 @@ namespace Matte_Seminarium_2
 
                 for (int i = 0; i < collisionPoints.Count; i++)
                 {
-                    _spriteBatch.DrawString(font, $"Ball and car collided at coordinates: {(int)collisionPoints[i].X}; {(int)collisionPoints[i].Y}", new(750, 10 + 20 * i), Color.Purple);
+                    _spriteBatch.DrawString(font, $"Ball and car collided at coordinates: {(int)collisionPoints[i].X}; {(int)collisionPoints[i].Y}", new(750, 10 + 20 * i), Color.Pink);
                 }
             }
 
